@@ -10,16 +10,16 @@ That is the whole skill. Everything in this book assumes you are starting from z
 
 Here is the trip map, chapter by chapter:
 
-1. Why running AI on your own computer may be worth your time.
-1. What your hardware can and cannot do, with honest RAM numbers.
-- How to install Ollama on Windows, macOS, and Linux.
-- How to pick small, modest models that do not choke old laptops.
-- Your first conversations through the terminal.
-- A free desktop chat window that is not a browser tab.
-- What the privacy trade-offs actually are, in both directions.
-- When local AI beats the cloud, and when it does not.
-- A glossary you can keep open in another tab.
-- A one-page hardware checklist before you install anything.
+- Why running AI on your own computer may be worth your time (chapter 1).
+- What your hardware can and cannot do, with honest RAM numbers (chapter 2).
+- How to install Ollama on Windows, macOS, and Linux (chapter 3).
+- How to pick small, modest models that do not choke old laptops (chapter 4).
+- Your first conversations through the terminal (chapter 5).
+- A free desktop chat window that is not a browser tab (chapter 6).
+- What the privacy trade-offs actually are, in both directions (chapter 7).
+- When local AI beats the cloud, and when it does not (chapter 8).
+- A glossary you can keep open in another tab (chapter 9).
+- A one-page hardware checklist before you install anything (chapter 10).
 
 ## How to use it
 

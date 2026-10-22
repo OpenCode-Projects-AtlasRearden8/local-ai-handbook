@@ -6,7 +6,7 @@ Published as a free resource by [Asdale Dynamics, LLC](https://dylanasdale.githu
 
 ## What is inside
 
-- **docs/** — the handbook itself, one Markdown file per chapter:
+- **docs/** — the handbook itself, one Markdown file per chapter. `00-introduction.md` is front matter ("Read This First"); the numbered chapters run 1–10:
   - Why run AI locally (privacy, offline use, no subscription)
   - Hardware and RAM guidance, with a RAM-to-model-size table
   - Installing **Ollama** on Windows, macOS, and Linux
@@ -38,10 +38,10 @@ python3 scripts/pipeline.py
 
 Then open `site/index.html` in any browser. Works with no web server and no network: the site makes zero external requests.
 
-Check the whole book in one page:
+Check the whole book in one page (open `site/book.html` in any browser, or `xdg-open site/book.html` on Linux / `open` on macOS):
 
 ```bash
-open site/book.html
+xdg-open site/book.html
 ```
 
 Lint the documentation (internal links, anchors, structure):

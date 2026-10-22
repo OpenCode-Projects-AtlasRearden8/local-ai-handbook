@@ -329,6 +329,7 @@ FENCE_CLOSE = re.compile(r"^```[^`]*$")
 TABLE_DIVIDER = re.compile(r"^\|?(\s*:?-{3,}:?\s*\|)+\s*:?-{3,}:?\s*\|?$")
 LINK_MD = re.compile(r"\[([^\]]+)\]\(([^)\s]+)\)")
 EXTERNAL_LINK = re.compile(r"(?i)^https?://")
+FRONT_MATTER = re.compile(r"^00[-_]")
 
 
 def esc(text: str) -> str:
@@ -598,6 +599,26 @@ def doc_heading_slugs(text: str) -> set[str]:
     return slugs
 
 
+def _chapter_numbers(chapters: list[dict]) -> None:
+    """Give each chapter a book number; '00-' stems are front matter (intro)."""
+    total = sum(1 for c in chapters if not FRONT_MATTER.match(c["stem"]))
+    n = 0
+    for c in chapters:
+        if FRONT_MATTER.match(c["stem"]):
+            c["num"] = None
+        else:
+            n += 1
+            c["num"] = n
+    for c in chapters:
+        c["total"] = total
+
+
+def _kicker(ch: dict) -> str:
+    if ch["num"] is None:
+        return "Front matter — read this first"
+    return f"Chapter {ch['num']} of {ch['total']}"
+
+
 def lint_docs(docs: list[tuple[str, str]]) -> list[str]:
     problems: list[str] = []
     slugs_by_file: dict[str, set[str]] = {}
@@ -667,6 +688,7 @@ def build_site(docs_dir: Path, out_dir: Path) -> list[Path]:
                 "html": convert(text),
             }
         )
+    _chapter_numbers(chapters)
 
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -689,7 +711,7 @@ def build_site(docs_dir: Path, out_dir: Path) -> list[Path]:
             desc = chapter["summary"][:150] + ("..." if len(chapter["summary"]) > 150 else "")
             meta = f'\n<meta name="description" content="{esc_attr(desc)}">'
         nav = f'<aside>\n<p class="nav-head">Chapters</p>\n<ol>\n{nav_items}\n</ol>\n</aside>'
-        content = f'<p class="kicker">Chapter {idx + 1} of {len(chapters)}</p>\n' + chapter["html"]
+        content = f'<p class="kicker">{_kicker(chapter)}</p>\n' + chapter["html"]
         prev_ch = chapters[idx - 1] if idx else None
         next_ch = chapters[idx + 1] if idx + 1 < len(chapters) else None
         parts = []
@@ -707,7 +729,11 @@ def build_site(docs_dir: Path, out_dir: Path) -> list[Path]:
         content += '\n<div class="pager">' + "".join(parts) + "</div>"
         page = PAGE_TMPL.format(
             meta=meta,
-            title=esc(chapter["plain"] + " | Chapter " + str(idx + 1)),
+            title=esc(
+                chapter["plain"]
+                if chapter["num"] is None
+                else chapter["plain"] + " | Chapter " + str(chapter["num"])
+            ),
             content=content,
             nav=nav,
             **template_vars,
@@ -718,10 +744,11 @@ def build_site(docs_dir: Path, out_dir: Path) -> list[Path]:
 
     book_sections: list[str] = []
     book_toc: list[str] = []
-    for idx, chapter in enumerate(chapters):
-        book_toc.append(f'<li><a href="#ch-{idx + 1}">{esc(chapter["plain"])}</a></li>')
+    for chapter in chapters:
+        section_id = "front" if chapter["num"] is None else f"ch-{chapter['num']}"
+        book_toc.append(f'<li><a href="#{section_id}">{esc(chapter["plain"])}</a></li>')
         book_sections.append(
-            f'<hr>\n<section id="ch-{idx + 1}">\n<p class="kicker">Chapter {idx + 1} of {len(chapters)}</p>\n'
+            f'<hr>\n<section id="{section_id}">\n<p class="kicker">{_kicker(chapter)}</p>\n'
             + chapter["html"]
             + "\n</section>"
         )
@@ -742,9 +769,9 @@ def build_site(docs_dir: Path, out_dir: Path) -> list[Path]:
 
     toc_items = "".join(
         f'    <li><a href="{c["name"]}"'
-        f'><span class="num">{idx + 1:02d}</span>{esc(c["plain"])}</a>'
+        f'><span class="num">{"FM" if c["num"] is None else format(c["num"], "02d")}</span>{esc(c["plain"])}</a>'
         f'<p class="desc">{esc(c["summary"])}</p></li>'
-        for idx, c in enumerate(chapters)
+        for c in chapters
     )
     home = HOME_TMPL.format(
         tagline=esc_attr(TAGLINE),
